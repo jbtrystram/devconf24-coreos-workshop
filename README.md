@@ -4,54 +4,62 @@ Welcome to the examples config files for the DevConf.cz 2024 CoreOS workshop !
 This repositories lays out the basic to get started and contains some example butane config files so you can 
 build on them to hack on your own coreOS instance ! 
 
+## 1 - Get into the workshop environnement
 
-## 1 - Transpile your first butane config to ignition
+Ssh into the host that will be displayed by the workshop host, using credentials you have been given. 
 
-If you have podman or docker installed you can simply run butane from a container: 
-```
-# using standard input/output
-podman run -i --rm quay.io/coreos/butane:release --strict < your_config.bu > result_config.ign
-# using files
-podman run --rm -v /path/to/your_config.bu:/config.bu:z quay.io/coreos/butane:release --strict /config.bu > result_config.ign
-```
+Once in, you are able to launch coreOS virtual machines with:  
 
-Otherwise, run `dnf/apk install butane`, then: 
 ```
-butane --strict config.bu > result_config.ign
+launch_coreos_vm
 ```
+TA-DA ! 
 
-Here is a minimal butane config for you to try:
+You should notice that you cannot log into it for now. Let's fix that.
+
+## 2 - Create your first ignition config 
+
+The provisionned environment (a coreOS machine) you've been given access to should have all the tools you need.
+
+Create a first butane file with the following contents: 
 ```yaml
 variant: fcos
 version: 1.5.0
-passwd:
-  users:
-    - name: core
-      ssh_authorized_keys:
-        - ssh-rsa AABBza75L... <your public key here>
+systemd:
+  units:
+    - name: serial-getty@ttyS0.service
+      dropins:
+      - name: autologin-core.conf
+        contents: |
+          [Service]
+          # Override Execstart in main unit
+          ExecStart=
+          # Add new Execstart with `-` prefix to ignore failure`
+          ExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM
 ```
-This will allow you to SSH into the machine.
+This will allow you to use login into the machine through the serial console.
 
-Make sure to pen the [butane specification](https://coreos.github.io/butane/specs/), you will probably need it later in this workshop ! 
-
-## 2 - Boot your first VM with the ignition config ! 
-
-ssh into the host that will be displayed by the workshop host, using credentials you have been given. 
-
-Once in, create your butane config in your home directory. 
-
-You can now launch a coreOS VM with : 
-
+You can now transpile this in the ignition format with:
+```
+butane --pretty --strict autologin.bu --output autologin.ign
 ```
 
+Then boot the VM as instructed before, but pass the ignition file as argument:
 ```
-TA-DA ! 
+launch_coreos_vm -i path/to/config.ign
+
+# you can even run the transpiling step at the same time with: 
+launch_coreos_vm -b path/to/config.bu
+```
+
+Make sure to open the [butane specification](https://coreos.github.io/butane/specs/), you will probably need it later in this workshop ! 
 
 You should think about coreOS like a container. If you want a change, update the config and re-provision the node.
 Doing ad-hoc changes works, but changing the butane/ignition config is easier to track, and always reproducable !
 
 
 ## 3 - Write a quadlet to run containers
+
 
 Now that you have the basic flow working, let's elaborate that ignition config a bit. 
 
@@ -82,7 +90,7 @@ See the [quadlet folder](./quadlet/) for other examples and implementation in a 
 More documentation at [man podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
 
 
-## 4 - Set up some backups
+## 4 - Set up some backups - storage
 
 Now that we have a nice service up and running, let's set a systemd timer (cron job alternative) to back up the data ! 
 
@@ -115,4 +123,10 @@ More documentation on [coreOS updates](https://docs.fedoraproject.org/en-US/fedo
 
 ## 6 - Experiment ! 
 
-Feel free to experiment with the coreOS instance you have access to, it will be destroyed after the workshop ends.
+Feel free to experiment with the coreOS instance you have access to, it will be destroyed after the workshop ends.o
+
+## 7 - How to do this at home ?
+
+Coreos-installer will help you create ISOs with your ignition config embedded. 
+
+We also have instructions for a bunch of platforms in the [coreOS documentation](https://docs.fedoraproject.org/en-US/fedora-coreos/bare-metal/)
