@@ -17,6 +17,9 @@ TA-DA !
 
 You should notice that you cannot log into it for now. Let's fix that.
 
+TIP: You can escape out of the console by pressing `Ctrl + ]` \
+As long as you use this script, VMs will be destroyed when you escape the console, so you can launch another.
+
 ## 2 - Create your first ignition config 
 
 The provisionned environment (a coreOS machine) you've been given access to should have all the tools you need.

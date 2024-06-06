@@ -14,6 +14,7 @@ Usage: $0 [OPTIONS]
   -d SERIAL               Attach a 1G disk to the VM with a custom serial number
   -h                      Print this help
 
+
   The following environnement variables are aslo supported:
   
   BACKING_STORE_PATH      Set a custom path for the boot backing store
@@ -21,6 +22,7 @@ Usage: $0 [OPTIONS]
 
 EOF
 }
+
 
 # Allow overriding the coreos QCOW file
 BACKING_STORE_PATH="${COREOS_BACKING_STORE_PATH:-/srv/fedora-coreos.qcow2}"
@@ -67,12 +69,18 @@ fi
 # Setup the correct SELinux label to allow access to the config
 if test -n "${IGNITION_CONFIG}"; then 
   chcon --verbose --type svirt_home_t "${IGNITION_CONFIG}"
-  IGN_CMDLINE="--qemu-commandline=\"-fw_cfg name=opt/com.coreos/config,file=${IGNITION_CONFIG}\""
+else 
+  IGNITION_CONFIG="/srv/dummy.ign" 
 fi
 
+
+IGN_CMDLINE=(--qemu-commandline="-fw_cfg name=opt/com.coreos/config,file=${IGNITION_CONFIG}")
+
 # Start a Fedora CoreOS virtual machine
-virt-install --name=fcos-"${USER}" --vcpus=2 --ram=1024 --os-variant=fedora-coreos-stable \
+virt-install --transient --name=fcos-"${USER}" --vcpus=2 --ram=1024 --os-variant=fedora-coreos-stable \
     --import --network=bridge=virbr0 --graphics=none \
-    "${IGN_CMDLINE:-}" \
+    "${IGN_CMDLINE}" \
     ${DISK_OPT:-} \
     --disk=size=20,backing_store="${BACKING_STORE_PATH}" ${VIRT_INSTALL_EXTRA_ARGS:-}
+
+virsh destroy fcos-"${USER}"
