@@ -41,7 +41,7 @@ while getopts 'hi:b:d:' FLAG; do
       BUTANE_CONFIG=${OPTARG}
       ;;
     d)
-      DISK_OPT="--disk size=1G,serial=${OPTARG}"
+      DISK_OPT="--disk size=1,serial=${OPTARG}"
       ;;
     h)
       print_help
@@ -80,7 +80,9 @@ IGN_CMDLINE=(--qemu-commandline="-fw_cfg name=opt/com.coreos/config,file=${IGNIT
 virt-install --transient --name=fcos-"${USER}" --vcpus=2 --ram=1024 --os-variant=fedora-coreos-stable \
     --import --network=bridge=virbr0 --graphics=none \
     "${IGN_CMDLINE}" \
-    ${DISK_OPT:-} \
-    --disk=size=20,backing_store="${BACKING_STORE_PATH}" ${VIRT_INSTALL_EXTRA_ARGS:-}
+    --disk=size=20,backing_store="${BACKING_STORE_PATH}" ${DISK_OPT:-} \
+    ${VIRT_INSTALL_EXTRA_ARGS:-}
+    
+    
 
 virsh destroy fcos-"${USER}"
