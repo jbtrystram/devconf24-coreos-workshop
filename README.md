@@ -70,7 +70,7 @@ You can rely on podman quadlets to generate systemd services that will handle th
 This use the systemd-generator feature : at boot, the quadlet-generator of podman will scan some well-known directories
 for `.container` files and generate systemd unit files. 
     
-The appropriate podman commands will be wrapped in a systemd unit so your containers are just a `systmectl start mycontainer` away!
+The appropriate podman commands will be wrapped in a systemd unit so your containers are just a `systemctl start mycontainer` away!
 
 Small example : 
 ```
