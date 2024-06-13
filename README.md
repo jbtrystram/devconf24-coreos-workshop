@@ -119,7 +119,7 @@ You can conveniently merge ignition configs into butane:
 ```
 variant: fcos
 version: 1.5.0
-ignition
+ignition:
   config:
     merge:
       - local: autologin.ign 
