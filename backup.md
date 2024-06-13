@@ -25,6 +25,7 @@ storage:
 ```
 
 Let´s break it down: 
+
 (1) Get the block device we want to format by the id. Here the `virtio-` prefix is due to how we virtualize the disk. 
 In real life this would be `nvme-Samsung_SSD_970_EVO...` \
 (2) Wipe the partition table. \

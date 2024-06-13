@@ -17,10 +17,10 @@ TA-DA !
 
 You should notice that you cannot log into it for now. Let's fix that.
 
-TIP: You can escape out of the console by pressing `Ctrl + ]` \
+**TIP**: You can escape out of the console by pressing `Ctrl + ]` \
 As long as you use this script, VMs will be destroyed when you escape the console, so you can launch another.
 
-TIP2: Sometimes, the console output may break the terminal output. Nothing `reset` won't fix!
+**TIP2**: Sometimes, the console output may break the terminal output. Nothing `reset` won't fix!
 ## 2 - Create your first ignition config 
 
 The provisionned environment (a coreOS machine) you've been given access to should have all the tools you need.
@@ -59,7 +59,7 @@ launch_coreos_vm -b autologin.bu
 Make sure to open the [butane specification](https://coreos.github.io/butane/specs/), you will probably need it later in this workshop ! 
 
 You should think about coreOS like a container. If you want a change, update the config and re-provision the node.
-Doing ad-hoc changes works, but changing the butane/ignition config is easier to track, and always reproducable !
+Doing ad-hoc changes works, but changing the butane/ignition config is easier to track, and always reproducible !
 
 
 ## 3 - Write a quadlet to run containers
@@ -86,9 +86,9 @@ WantedBy=multi-user.target (4)
 1: The container will use the image at `docker.io/nginx` \
 2: mount /var/nginx/html inside the container at /usr/share/nginx/html (read only) \
 3: If the service exit, always restart it \
-4: Ties the service to a well-known target so it is started at boot.\
+4: Ties the service to a well-known target so it is started at boot. \
 
-Create this in `/etc/containers/systemd/nginx.container` using a `storage.file` butane key:
+Create this in `/etc/containers/systemd/nginx.container` using a `storage.files` butane key:
 ```
 variant: fcos
 version: 1.5.0
@@ -98,14 +98,16 @@ passwd:
 storage:
   files:
     - path: /etc/containers/systemd...
-      mode: 0644
       contents:
         inline: |
-         [Container]
-         Image=quay.io....
+          [Container]
+          Image=quay.io....
 ```
 
 See the [quadlet page](./quadlet.md) for other examples and implementation in a butane config !
+
+**TIP**: If you mess up the quadlet file, you can use: 
+`/usr/libexec/podman/quadlet -dryrun` from within the VM to debug your file. 
 
 More documentation at [man podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
 
@@ -136,7 +138,7 @@ than a one-liner, feel free to break out a script and call it from the systemd u
 
 See [the backup doc](./backup.md) for an example
 
-[man systemd.unit](https://www.man7.org/linux/man-pages/man5/systemd.unit.5.html)
+[man systemd.unit](https://www.man7.org/linux/man-pages/man5/systemd.unit.5.html) \
 [man systemd.timer](https://www.man7.org/linux/man-pages/man5/systemd.timer.5.html)
 
 ## 5 - Tune the update schedule
@@ -167,3 +169,9 @@ Feel free to experiment with the coreOS instance you have access to, it will be 
 Coreos-installer will help you create ISOs with your ignition config embedded. 
 
 We also have instructions for a bunch of platforms in the [coreOS documentation](https://docs.fedoraproject.org/en-US/fedora-coreos/bare-metal/)
+
+# Useful links
+
+Butane examples: https://coreos.github.io/butane/examples/
+CoreOS tutorials: https://docs.fedoraproject.org/en-US/fedora-coreos/tutorial-autologin/
+
