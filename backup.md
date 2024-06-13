@@ -38,31 +38,31 @@ So now that we have a backupo disk available, let's set up a scheduled job to sa
 
 We want to copy the content of our application, so the heart of it would be: 
 ```
-rsync -a /var/syncthing/ /var/backup/syncthing
+rsync -a /var/nginx/ /var/backup/nginx
 ```
 
 Let's build that into a systemd service, triggered by a timer:
 ```
-# syncthing-backup.service:
+# nginx-backup.service:
   [Unit]
-  Description=runs rsync backup of /var/syncthing
-   # Stop syncthing to avoid data conflicts
-  Conflicts=syncthing.service
+  Description=runs rsync backup of /var/nginx
+   # Stop nginx container to avoid data conflicts
+  Conflicts=nginx.service
 
   [Service]
   Type=oneshot
-  ExecStart=rsync -av /var/syncthing /var/backup/syncthing
+  ExecStart=rsync -av /var/nginx /var/backup/nginx
   [Install]
   WantedBy=multi-user.target
 
-# syncthing-backup.timer:
+# nginx-backup.timer:
   [Unit]
-  Description=runs syncthing-backup.service nightly
+  Description=runs nginx-backup.service nightly
 
   [Timer]
   OnCalendar=*-*-* 3:00:00
   Persistent=true
-  Unit=syncthing-backup.service
+  Unit=nginx-backup.service
 
   [Install]
   WantedBy=timers.target

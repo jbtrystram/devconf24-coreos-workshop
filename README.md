@@ -20,6 +20,7 @@ You should notice that you cannot log into it for now. Let's fix that.
 TIP: You can escape out of the console by pressing `Ctrl + ]` \
 As long as you use this script, VMs will be destroyed when you escape the console, so you can launch another.
 
+TIP2: Sometimes, the console output may break the terminal output. Nothing `reset` won't fix!
 ## 2 - Create your first ignition config 
 
 The provisionned environment (a coreOS machine) you've been given access to should have all the tools you need.
@@ -49,10 +50,10 @@ butane --pretty --strict autologin.bu --output autologin.ign
 
 Then boot the VM as instructed before, but pass the ignition file as argument:
 ```
-launch_coreos_vm -i path/to/config.ign
+launch_coreos_vm -i autologin.ign
 
 # you can even run the transpiling step at the same time with: 
-launch_coreos_vm -b path/to/config.bu
+launch_coreos_vm -b autologin.bu
 ```
 
 Make sure to open the [butane specification](https://coreos.github.io/butane/specs/), you will probably need it later in this workshop ! 
@@ -82,16 +83,49 @@ Restart=always (3)
 [Install]
 WantedBy=multi-user.target (4)
 ```
-1: The container will use the image at `docker.io/nginx` 
-2: mount /var/nginx/html inside the container at /usr/share/nginx/html (read only)
-3: If the service exit, always restart it
-4: Ties the service to a well-known target so it is started at boot.
-Simply create this in `/etc/containers/systemd/nginx.container` for example.
+1: The container will use the image at `docker.io/nginx` \
+2: mount /var/nginx/html inside the container at /usr/share/nginx/html (read only) \
+3: If the service exit, always restart it \
+4: Ties the service to a well-known target so it is started at boot.\
 
-See the [quadlet folder](./quadlet/) for other examples and implementation in a butane config !
+Create this in `/etc/containers/systemd/nginx.container` using a `storage.file` butane key:
+```
+variant: fcos
+version: 1.5.0
+passwd:
+  users:
+    - name: wordpress
+storage:
+  files:
+    - path: /etc/containers/systemd...
+      mode: 0644
+      contents:
+        inline: |
+         [Container]
+         Image=quay.io....
+```
+
+See the [quadlet page](./quadlet.md) for other examples and implementation in a butane config !
 
 More documentation at [man podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
 
+
+## 3b - Merge butane configs together
+
+At this point you probably booted a few VMs and have a few butane/ignition files laying around. \
+You can conveniently merge ignition configs into butane: 
+```
+variant: fcos
+version: 1.5.0
+ignition
+  config:
+    merge:
+      - local: autologin.ign 
+      - local: some_other_config.ign 
+      - source: http://example.com/remote_config.ign 
+```
+
+See the `ignition` key in the butane documentation for more details.
 
 ## 4 - Set up some backups - storage
 
@@ -100,7 +134,7 @@ Now that we have a nice service up and running, let's set a systemd timer (cron 
 So we would have: a systemd timer tied to systemd unit that does the backup work. If the backup script is more complex
 than a one-liner, feel free to break out a script and call it from the systemd unit. 
 
-See [the backup folder](./backup) for an example
+See [the backup doc](./backup.md) for an example
 
 [man systemd.unit](https://www.man7.org/linux/man-pages/man5/systemd.unit.5.html)
 [man systemd.timer](https://www.man7.org/linux/man-pages/man5/systemd.timer.5.html)
@@ -126,7 +160,7 @@ More documentation on [coreOS updates](https://docs.fedoraproject.org/en-US/fedo
 
 ## 6 - Experiment ! 
 
-Feel free to experiment with the coreOS instance you have access to, it will be destroyed after the workshop ends.o
+Feel free to experiment with the coreOS instance you have access to, it will be destroyed after the workshop ends.
 
 ## 7 - How to do this at home ?
 
